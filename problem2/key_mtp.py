@@ -7,20 +7,21 @@ import hmac
 import hashlib
 import secrets
 
-def generateKey(keysize = 64):
-	## TOTP: Time-Based One-Time Password Algorithm
-    # refer https://tools.ietf.org/html/rfc6238
-    secret = secrets.token_hex(keysize).encode()
-    totp = base64.b64encode(str(time.time()).encode("ascii"))
+def generateKey(keysize = 64): # in bytes
+	bv = BitVector(size = 0)
 
-    ## HOTP: An HMAC-Based One-Time Password Algorithm
-    # refer https://tools.ietf.org/html/rfc4226
-    hotp_mac_sha512 = hmac.new(key = secret, msg = totp, digestmod=hashlib.sha512).hexdigest()
-    hotp = hotp_mac_sha512[:keysize]
+	for i in range(0, keysize//64 + 1):
+		## TOTP: Time-Based One-Time Password Algorithm
+		# refer https://tools.ietf.org/html/rfc6238
+		secret = secrets.token_hex(512).encode()
+		totp = base64.b64encode(str(time.time() + i).encode("ascii"))
+		## HOTP: An HMAC-Based One-Time Password Algorithm
+		# refer https://tools.ietf.org/html/rfc4226
+		hotp = hmac.new(key = secret, msg = totp, digestmod=hashlib.sha512).hexdigest()
+		# convert to bitvector
+		bv += BitVector(hexstring = hotp)
 
-    # convert to bitvector
-    bv = BitVector(textstring = hotp)
-    return bv
+	return bv[0:keysize*8]
 
 
 if __name__ == "__main__":
