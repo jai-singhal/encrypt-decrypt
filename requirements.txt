@@ -1,0 +1,2 @@
+# requirements package for this assignment
+BitVector==3.4.9 
