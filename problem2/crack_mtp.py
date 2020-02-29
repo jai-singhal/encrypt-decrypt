@@ -35,7 +35,7 @@ class CrackMTP(object):
         self.SPACE_ASCII = ord(" ")
         self.ciphertexts = list()
         self.key = list()
-        self.threshold = 0.85
+        self.threshold = 0.75
 
     """
     Check for space, i.e, 0
@@ -95,39 +95,52 @@ class CrackMTP(object):
                             else:
                                 spaceCounter[index] += 1
 
-
             for index, count in spaceCounter.items():
                 # if count == len(ciphers) - 1:
-                if count > len(ciphers)*self.threshold:
+                if count > int(len(ciphers)*self.threshold):
                     # pi ^ ci = key; pi = space
-                    outer_c = c1.get_bitvector_in_ascii()
-                    key[index] = self.SPACE_ASCII ^ ord(outer_c[index])
+                    try:
+                        outer_c = c1.get_bitvector_in_ascii()
+                        key[index] = self.SPACE_ASCII ^ ord(outer_c[index])
+                    except Exception as e:
+                        pass
         return key
 
     """
     Main function, which calls crack_hrd for cipher text,
-    reduces the min length cipher, to get the plain text from big ciphers.
+    remove the min length cipher, in each iteration, and 
+    calls repeteadly, to get the plain text from longer cipher texts.
     """
     def spacing_mtp_attack(self, ctfile):
         
         self.ciphertexts = self.read_ciphers(ctfile)
         ciphers = sorted(self.ciphertexts, key = len)
         self.key = list()
+        # self.key = self.crack_hrd(self.ciphertexts)
+        truncate_next = len(ciphers[0])
         while len(ciphers) > 1:
             last_key = self.crack_hrd(ciphers)
-            self.key.extend(last_key[len(self.key):])
+            self.key.extend(last_key)
             ciphers = ciphers[1:]
-        
+            for i, cipher in enumerate(ciphers):
+                ciphers[i] = ciphers[i][truncate_next:]
+            truncate_next = len(ciphers[0])
+
         plaintexts = []
+        keyLen = len(self.key)
+        not_found_count = 0
+        found_count = 0
         for cip in self.ciphertexts:
             pt = str()
-            for i, j in zip(cip.get_bitvector_in_ascii(), self.key):
-                if j is not None:
-                    pt += chr(ord(i) ^ j)
+            for c_index, ci in enumerate(cip.get_bitvector_in_ascii()):
+                if c_index < keyLen and self.key[c_index] is not None:
+                    pt += chr(ord(ci) ^ self.key[c_index])
+                    found_count += 1
                 else:
                     pt += "*"
+                    not_found_count += 1
             plaintexts.append(pt)
-        return plaintexts
+        return plaintexts, found_count/(not_found_count+found_count)
                 
 
     """
@@ -148,8 +161,12 @@ if __name__ == "__main__":
     print("Crack started!!")
     print("Please wait for crack to finish, this will take few seconds...")
 
-    c = CrackMTP()
-    decrypted_msg = c.spacing_mtp_attack(cfname)
-    c.writeDecryptedPlainText(decrypted_msg)
+    try:
+        c = CrackMTP()
+        decrypted_msg, accuracy = c.spacing_mtp_attack(cfname)
+        c.writeDecryptedPlainText(decrypted_msg)
+        print(f"\nPlain text is written into recoveredtext.txt file.\n")
+        print(f"Accuracy is: {accuracy*100}%")
+    except Exception as e:
+        print(f"Exception caught: {type(e).__name__}")
         
-    print(f"\nPlain text is written into recoveredtext.txt file.\n\n")

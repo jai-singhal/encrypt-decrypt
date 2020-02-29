@@ -21,8 +21,8 @@ Space XOR Space = 0
 Given, 
 C(i) = C(i-1) ^ P(i) ^ K, where i ∈ [0, NUMB_BLOCKS]
 ==> C(i-1) ^ C(i) = P(i) ^ K
-==> C`(i) = P(i) ^ K
-==> P(i) = C`(i) ^ K 
+==> C'(i) = P(i) ^ K
+==> P(i) = C'(i) ^ K 
 
 Its in MTP, with each block is encrypted with same key.
 We can use space attack, just as we used in other question.
@@ -154,8 +154,8 @@ class crackCBC(object):
 
 
     """
-    Other Main Function that takes cipher text and returns key
-    Computes key, if there is zero padding available
+    Other Main Function that takes cipher text and returns key.
+    It computes key, if there is zero padding available
     """
     def orcale_paddng_attack(self, cipher):
         oldTotalChars = 0
@@ -233,12 +233,15 @@ if __name__ == "__main__":
     print("Crack started!!")
     print("Please wait for crack to finish, this will take few seconds...")
 
-    c = crackCBC()
-    cipher = c.readCipher(cfname)
-    key = c.orcale_paddng_attack(cipher)
-    decrypted_msg = c.spacing_mtp_attack(cipher, key).strip("\n \0\t")
-    c.writeDecryptedPlainText(decrypted_msg)
-
+    try:
+        c = crackCBC()
+        cipher = c.readCipher(cfname)
+        key = c.orcale_paddng_attack(cipher)
+        decrypted_msg = c.spacing_mtp_attack(cipher, key).strip("\n \0\t")
+        c.writeDecryptedPlainText(decrypted_msg)
+    except Exception as e:
+        print(f"Exception caught: {type(e).__name__}")
+        
     print(f"\n\nPlain text is written into recoveredtext.txt file.\n")
     
  

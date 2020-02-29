@@ -1,7 +1,18 @@
-from __future__ import print_function
+#!/usr/bin/env python
+# decrypt_mtp.py
+
+__author__ = "Jai Singhal"
+__copyright__ = "Copyright Feb, 2020"
+__version__ = "1.0.0"
+__maintainer__ = "Jai Singhal"
+__email__ = "h20190021@pilani.bits-pilani.ac.in"
+__website__ = "http://jai-singhal.github.io"
+__github_repo__ = "https://github.com/jai-singhal/encrypt-decrypt"
+
+
 import sys
 import os
-from key_gen import generateKey
+from key_mtp import generateKey
 import base64
 from BitVector import BitVector
 
@@ -37,22 +48,20 @@ def decryptFromFile(ctfile, ptfile, keyfile):
         decrypted = decrypt(ctbv, keybv)
         plaintexts.append(decrypted)
 
-    with open(plainfile, "w") as kf:
+    with open(plainfile, "w", newline="") as kf:
         for pt in plaintexts:
             pt = pt.getTextFromBitVector()
             kf.write(pt)
-            kf.write("\n")
 
     print("Your cipher texts is written into file {}".format(ptfile))
     return plaintexts
 
 def decryptFromCmd(ct, key):
     ct = ct.strip()
-    ctbv = BitVector(textstring = ct)
+    ctbv = BitVector(hexstring = ct)
     key = BitVector(hexstring = key)
     pt = decrypt(ctbv, key)
     pt = pt.getTextFromBitVector()
-    print(pt)
     return pt
 
 if __name__ == "__main__":
@@ -67,13 +76,22 @@ if __name__ == "__main__":
         ctfile = input("Enter file name where cipher stored: ")
         keyfile = input("Enter file name of key: ")
         plainfile = input("Enter file name where you want to store plaintext: ")
-        plaintexts = decryptFromFile(ctfile, plainfile, keyfile)
-        
+        try:
+            plaintexts = decryptFromFile(ctfile, plainfile, keyfile)
+        except Exception as e:
+            print("Please provide the correct hex")
+            print(f"Exception caught: {type(e).__name__}")
 
     elif ch == 2:
         ct = input("Input ciphertext here: ")
         key = input("Input key here: ")
-        decryptFromCmd(ct, key)
+        try:
+            pt = decryptFromCmd(ct, key)
+            print(f"Your plaintext is: {pt}")
+        except Exception as e:
+            print("Please provide the correct hex")
+            print(f"Exception caught: {type(e).__name__}")
+
     else:
         print("Wrong choice!!")
         sys.exit()

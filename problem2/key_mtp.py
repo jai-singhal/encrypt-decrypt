@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+# key_mtp.py
+
+__author__ = "Jai Singhal"
+__copyright__ = "Copyright Feb, 2020"
+__version__ = "1.0.0"
+__maintainer__ = "Jai Singhal"
+__email__ = "h20190021@pilani.bits-pilani.ac.in"
+__website__ = "https://jai-singhal.github.io"
+__github_repo__ = "https://github.com/jai-singhal/encrypt-decrypt"
+
+
 import os
 import sys
 import base64
@@ -25,12 +37,15 @@ def generateKey(keysize = 64): # in bytes
 
 
 if __name__ == "__main__":
-    key_size = None
-    if sys.version_info[0] == 3:                                             
-        key_size = input("\nEnter size of key: ")            
-    else:                                                                         
-        key_size = raw_input("\nEnter size of key: ")
-    key_size = int(key_size.strip())
+	key_size = None
+	if sys.version_info[0] == 3:                                             
+		key_size = input("\nEnter size of key: ")            
+	else:                                                                         
+		key_size = raw_input("\nEnter size of key: ")
+	key_size = int(key_size.strip())
 
-    key = generateKey(key_size)
-    print(key)
+	try:
+		key = generateKey(key_size)
+		print(key.get_bitvector_in_hex())
+	except Exception as e:
+		print(f"Exception caught: {type(e).__name__}")

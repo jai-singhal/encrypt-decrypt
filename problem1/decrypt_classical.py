@@ -71,6 +71,6 @@ for i in range(0, len(cipher) // BLOCKSIZE):
 out = msg_encrypted_bv.getTextFromBitVector().strip(' \t\r\n\0')
 
 # Write ciphertext bitvector to the output file:
-FILEOUT = open(sys.argv[2], 'w')
+FILEOUT = open(sys.argv[2], 'w', newline="")
 FILEOUT.write(out)
 FILEOUT.close()   
